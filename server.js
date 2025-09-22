@@ -6,10 +6,11 @@ const jwt = require("jsonwebtoken");
 const app = express();
 app.use(bodyParser.json());
 
+// In-memory database
 const users = [];
-const SECRET_KEY = "JWT_SECRET"; // from lecture notes
+const SECRET_KEY = "JWT_SECRET"; 
 
-// Register Route
+// 📌 TOPIC: Password Hashing 
 app.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -18,7 +19,6 @@ app.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Username and password are required" });
     }
     
-    // Check if user already exists
     const existingUser = users.find((u) => u.username === username);
     if (existingUser) {
       return res.status(409).json({ message: "User already exists" });
@@ -33,7 +33,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Login Route (with JWT)
+// JWT Authentication 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
   const user = users.find((u) => u.username === username);
@@ -50,7 +50,7 @@ app.post("/login", async (req, res) => {
   res.json({ message: "Login Successful", token });
 });
 
-// Middleware: Verify JWT
+// Authorization Middleware 
 function authenticateToken(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -63,14 +63,13 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// Protected Route
+// Protected Routes 
 app.get("/profile", authenticateToken, (req, res) => {
   res.json({ message: `Welcome ${req.user.username}` });
 });
 
 app.listen(3000, () => console.log("Server running on port 3000"));
 
-// Add error handling
 process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
 });
