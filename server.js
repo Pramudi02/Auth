@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 const users = [];
 const SECRET_KEY = "JWT_SECRET"; 
 
-// 📌 TOPIC: Password Hashing 
+// Password Hashing 
 app.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;
