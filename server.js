@@ -11,11 +11,26 @@ const SECRET_KEY = "JWT_SECRET"; // from lecture notes
 
 // Register Route
 app.post("/register", async (req, res) => {
-  const { username, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  users.push({ username, password: hashedPassword });
-  res.json({ message: "User registered successfully!" });
+  try {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required" });
+    }
+    
+    // Check if user already exists
+    const existingUser = users.find((u) => u.username === username);
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists" });
+    }
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    users.push({ username, password: hashedPassword });
+    res.json({ message: "User registered successfully!" });
+  } catch (error) {
+    console.error('Register error:', error);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
 
 // Login Route (with JWT)
@@ -54,3 +69,12 @@ app.get("/profile", authenticateToken, (req, res) => {
 });
 
 app.listen(3000, () => console.log("Server running on port 3000"));
+
+// Add error handling
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+});
